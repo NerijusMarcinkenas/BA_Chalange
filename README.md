@@ -1,5 +1,5 @@
 # BA_Chalange
-This is Books spot chalange project v-1.
+This is Books spot library project v-1.
 
 * For data is used JSON file with mocked books,
 * User side is not mocked. You have to register. (email is not required as a legit one),
