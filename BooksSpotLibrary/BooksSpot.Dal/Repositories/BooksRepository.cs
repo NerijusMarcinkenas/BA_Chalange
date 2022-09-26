@@ -9,7 +9,7 @@ namespace BooksSpot.Data.Repositories
     public class BooksRepository : IBooksRepository<Book>
     {
         private readonly ApplicationDbContext _db;
-
+    
         public BooksRepository(ApplicationDbContext db)
         {
             _db = db;
@@ -38,12 +38,11 @@ namespace BooksSpot.Data.Repositories
 
         public Task<int> CommitAsync() => _db.SaveChangesAsync();
 
-        public Task<List<Book>> GetAllAsync(string? searchTerm = null)
+        public Task<List<Book>> GetSpecifiedCountBooksAsync(int takeCount = 25, string? searchTerm = null)
         {
-            return _db.Books.Include(r => r.BookRezervationInfo).Where(x => string.IsNullOrWhiteSpace(searchTerm) ||
+                return _db.Books.Include(r => r.BookRezervationInfo).Where(x => string.IsNullOrWhiteSpace(searchTerm) ||
                                    x.Title.ToUpper().Contains(searchTerm.ToUpper()) ||
-                                   x.Author.ToUpper().Contains(searchTerm.ToUpper()))
-                                   .OrderBy(n => n.Title).ToListAsync();
+                                   x.Author.ToUpper().Contains(searchTerm.ToUpper())).Take(takeCount).ToListAsync();
         }
 
         public Task<List<Book>> GetByAuthorAsync(string author)
@@ -97,11 +96,14 @@ namespace BooksSpot.Data.Repositories
             {
                 { SearchType.Author, GetByAuthorAsync },               
                 { SearchType.Title, GetByTitleAsync },
-                { SearchType.All, GetAllAsync },
                 { SearchType.Isbn, GetByIsbnAsync },
                 { SearchType.Publisher, GetByPublisherAsync }
             };
             return dict;
         }
+
+        public int GetBooksCount() => _db.Books.Count();      
+
+        public bool IsAnyBooks() => _db.Books.Any();
     }
 }

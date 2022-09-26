@@ -5,8 +5,8 @@ namespace BooksSpot.Web.DTOs
 {
     public class RezervationInfoDto
     {     
-        public DateTime? RezerverdDate { get; set; } = null;
-        public DateTime? RezervationExpirationDate { get; set; } = null;
+        public DateTime RezerverdDate { get; set; } 
+        public DateTime RezervationExpirationDate { get; set; } 
         public int ExpirationDays { get; set; }        
 
         public RezervationInfoDto()
@@ -15,8 +15,8 @@ namespace BooksSpot.Web.DTOs
 
         public RezervationInfoDto(BookRezervation info)
         {
-            RezerverdDate = info.RezerverdDate;
-            RezervationExpirationDate = info.RezervationExpirationDate;
+            RezerverdDate = info.RezerverdDate.Date;
+            RezervationExpirationDate = info.RezervationExpirationDate.Date;
         }
     }
 }

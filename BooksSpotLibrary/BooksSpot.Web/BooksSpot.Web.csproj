@@ -26,8 +26,4 @@
     <ProjectReference Include="..\BooksSpot.Service\BooksSpot.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Configurations\" />
-  </ItemGroup>
-
 </Project>

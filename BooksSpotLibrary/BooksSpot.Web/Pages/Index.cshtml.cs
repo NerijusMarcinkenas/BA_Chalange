@@ -7,19 +7,12 @@ namespace BooksSpot.Web.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
-        private readonly ILendingService<Book, ApplicationUser> _service;
-
-        public IndexModel(ILogger<IndexModel> logger,
-                            ILendingService<Book,ApplicationUser> service)
-        {
-            _logger = logger;
-            _service = service;
+        public IndexModel()
+        {           
         }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
-            await _service.ReturnExpiredBooks();
         }
     }
 }

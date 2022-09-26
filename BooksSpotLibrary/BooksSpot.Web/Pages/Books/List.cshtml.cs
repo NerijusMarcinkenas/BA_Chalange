@@ -29,8 +29,9 @@ namespace BooksSpot.Web.Pages.Books
         public BookStatus BookStatus { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public Genre Genre { get; set; }
-       
+        public Genre Genre { get; set; }       
+        public int SkipCount { get; set; }
+        public string? Flag { get; set; } = string.Empty;
 
         public IEnumerable<SelectListItem> SearchTypes { get; set; } = Enumerable.Empty<SelectListItem>();
 
@@ -62,14 +63,21 @@ namespace BooksSpot.Web.Pages.Books
             {
                 Error = TempData["Error"]?.ToString();
             }
-            var books = await _service.GetAllBooksAsync();
+
+            var books = await _service.GetBooksByTakeCount();            
             BooksDto = books.Select(b => new BookDto(b)).ToList();
+            SkipCount = BooksDto.Count;
+            Flag = "loadMore";
             return Page();
         }
 
         public async Task<IActionResult> OnGetSearchAsync()
         {
-            SetDropDownFields();           
+            SetDropDownFields();
+            if (string.IsNullOrEmpty(SearchTerm) || SearchType.Equals(SearchType.All))
+            {
+                Flag = "loadMore";
+            }
             var booksResult = await _service.GetBooksBySearchTypeAsync(SearchTerm, SearchType);
 
             if (booksResult.Result == null || !booksResult.Result.Any())
@@ -79,6 +87,8 @@ namespace BooksSpot.Web.Pages.Books
                 return Page();
             }
             BooksDto = booksResult.Result.Select(b => new BookDto(b)).ToList();
+            SkipCount = BooksDto.Count;
+           
             return Page();
         }
 
@@ -94,9 +104,32 @@ namespace BooksSpot.Web.Pages.Books
                 return Page();
             }
             BooksDto = booksFromDb.Select(b => new BookDto(b)).ToList();
+            SkipCount = BooksDto.Count;
+            Flag = "filter";
             return Page();
         }
 
+        public async Task<IActionResult> OnGetLoadMore(int take)
+        {
+            SetDropDownFields();
+
+            if (TempData["Message"] != null)
+            {
+                Message = TempData["Message"]?.ToString();
+            }
+
+            if (TempData["Error"] != null)
+            {
+                Error = TempData["Error"]?.ToString();
+            }
+
+            var books = await _service.GetBooksByTakeCount(take);
+
+            BooksDto.AddRange(books.Select(b => new BookDto(b)).ToList());
+            SkipCount = BooksDto.Count;
+            Flag = "loadMore";
+            return Page();
+        }
         private void SetDropDownFields()
         {
             SearchTypes = _htmlHelper.GetEnumSelectList<SearchType>();

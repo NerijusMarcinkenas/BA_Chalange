@@ -1,7 +1,9 @@
-﻿@page "{handler?}/{bookId:int?}"
+﻿@page "{handler?}/{take:int?}/{bookId:int?}"
 @using BooksSpot.Core.Enums
 @model BooksSpot.Web.Pages.Books.BooksListModel
 @{
+    int take = Model.BooksDto.Count + 25;
+    var flag = Model.Flag;
 }
 
 <div class="container p-3">
@@ -14,7 +16,7 @@
 
         <div class="col-3">
             <div class="">
-                <form method="get">
+                <form id="filter" method="get">
                     <div class="form-group">
                         <div class="input-group">
                             <select class="form-control" asp-for="BookStatus" asp-items="Model.BookStatusFilter">
@@ -36,7 +38,7 @@
             <h2 class="text-secondary">Search books</h2>
         </div>
         <div class="col-4 text-end mb-2 flex-nowrap">
-            <form method="get">
+            <form id="search" method="get">
                 <div class="form-group">
                     <div class="input-group">
                         <select class="form-control" asp-for="SearchType" asp-items="Model.SearchTypes">
@@ -51,7 +53,7 @@
             </form>
         </div>
     </div>
-
+   <div>Showing results: @Model.BooksDto.Count</div>
     <table class="table table-bordered table-striped align-content-center" style="width: 100%">
         <thead>
             <tr>
@@ -114,5 +116,17 @@
             }
         </tbody>
     </table>
+    @if (flag == "loadMore")
+    {
+        <div>
+            <form id="loadMore" method="get">
+                <button asp-page="./List" asp-route-take="@take" asp-page-handler="LoadMore"
+                    type="submit" class="btn btn-info">
+                    Load More
+                </button>
+            </form>
+        </div>
+    }
+    
 </div>
 

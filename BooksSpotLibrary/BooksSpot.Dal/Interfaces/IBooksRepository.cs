@@ -13,7 +13,7 @@ namespace BooksSpot.Data.Interfaces
 
         Task<TBook?> GetBookByIdAsync(int id);
 
-        Task<List<TBook>> GetAllAsync(string? searchTerm = null);
+        Task<List<TBook>> GetSpecifiedCountBooksAsync(int takeCount = 25, string? searchTerm = null);
 
         Task<List<TBook>> GetByTitleAsync(string title);
 
@@ -33,5 +33,7 @@ namespace BooksSpot.Data.Interfaces
 
         Task<int> CommitAsync();
 
+        int GetBooksCount();
+        bool IsAnyBooks();
     }
 }

@@ -36,10 +36,10 @@
         Book is rezerved to: @Model.UserDto.Name
     </div>
     <div>
-        Rezervation expires: @Model.RezervationInfoDto.RezervationExpirationDate
+        Rezervation expires: @Model.RezervationInfoDto.RezervationExpirationDate.ToString("yyyy-MM-dd")
     </div>
     <div>
-        Rezerved on: @Model.RezervationInfoDto.RezerverdDate
+        Rezerved on: @Model.RezervationInfoDto.RezerverdDate.ToString("yyyy-MM-dd")
     </div>
 
 }

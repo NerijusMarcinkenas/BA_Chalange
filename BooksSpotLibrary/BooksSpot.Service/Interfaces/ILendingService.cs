@@ -14,15 +14,13 @@ namespace BooksSpot.Service.Interfaces
 
         Task<ResultExtension<TBook>> ReturnBookAsync(string userId, TBook bookToReturn);
 
-        Task<ResultExtension<List<TBook>>> GetBooksBySearchTypeAsync(string searchTerm, SearchType type = SearchType.All);
-        Task<List<TBook>> GetBooksByFiltersAsync(BookStatus status, Genre genre);
+        Task<ResultExtension<List<TBook>>> GetBooksBySearchTypeAsync(string searchTerm, SearchType type = SearchType.All, int takeCount = 25);
+        Task<List<TBook>> GetBooksByFiltersAsync(BookStatus status, Genre genre, int skipCount = 0);
 
         Task<TBook?> GetBookByIdAsync(int id);
 
-        Task<List<TBook>> GetAllBooksAsync();
+        Task<List<TBook>> GetBooksByTakeCount(int takeCount = 25);
 
         Task<List<TBook>> GetUserBooksAsync(string userId);
-
-        Task ReturnExpiredBooks();
     }
 }

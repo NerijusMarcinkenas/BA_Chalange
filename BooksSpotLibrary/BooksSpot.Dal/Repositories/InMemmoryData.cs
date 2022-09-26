@@ -3,13 +3,12 @@ using BooksSpot.Core.Models;
 using BooksSpot.Data.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using System.Reflection.Metadata;
 
 namespace BooksSpot.Data.Repositories
 {
     public interface IMemmoryData
     {
-        void ReadAllBooksFromJsonAndWriteToDb(string? path = null);
+        Task ReadAllBooksFromJsonAndWriteToDb(string? path = null);
     }
 
     public class InMemmoryData : IMemmoryData
@@ -24,7 +23,7 @@ namespace BooksSpot.Data.Repositories
             _path = configuration.GetSection("JsonBooksPath").Value;
         }
 
-        public void ReadAllBooksFromJsonAndWriteToDb(string? path = null)
+        public Task ReadAllBooksFromJsonAndWriteToDb(string? path = null)
         {
             string jsonBooks;
 
@@ -42,7 +41,7 @@ namespace BooksSpot.Data.Repositories
             {
                 _booksRepository.AddToDb(book);
             }
-            _booksRepository.CommitAsync().Wait();
+            return _booksRepository.CommitAsync();
         }
     }
 }

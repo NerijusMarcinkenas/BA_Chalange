@@ -16,24 +16,24 @@ namespace BooksSpot.Service.Services
         private readonly IConfiguration _configuration;
 
         public LendingService(IBooksRepository<Book> booksRepository,
-                                IReaderRepository<ApplicationUser> readerRepository,
+                                IReaderRepository<ApplicationUser> readerRepository,                              
                                 IConfiguration configuration)
         {
             _booksRepository = booksRepository;
             _readerRepository = readerRepository;
             _configuration = configuration;
+            
         }
 
-        public async Task<List<Book>> GetAllBooksAsync()
+        public async Task<List<Book>> GetBooksByTakeCount(int takeCount = 25)
         {
-            var books = await _booksRepository.GetAllAsync(string.Empty);
-            if (!books.Any())
+            if (!_booksRepository.IsAnyBooks())
             {
-                var inMemData = new InMemmoryData(_booksRepository, _configuration);
-                inMemData.ReadAllBooksFromJsonAndWriteToDb();
+                var memmoryData = new InMemmoryData(_booksRepository, _configuration);
+                await memmoryData.ReadAllBooksFromJsonAndWriteToDb();
             }
-
-            return books;
+            
+            return await _booksRepository.GetSpecifiedCountBooksAsync(takeCount); 
         }
 
         public Task<Book?> GetBookByIdAsync(int id) => _booksRepository.GetBookByIdAsync(id);
@@ -96,7 +96,7 @@ namespace BooksSpot.Service.Services
 
                 await _booksRepository.CommitAsync();
                 resultExt.Result = bookToRezerve;
-                resultExt.Message = $"Book is rezerved untill {info.RezervationExpirationDate} succesffully";
+                resultExt.Message = $"Book is rezerved untill {info.RezervationExpirationDate:yyyy-MM-dd} succesffully";
                 return resultExt;
             }
 
@@ -134,12 +134,12 @@ namespace BooksSpot.Service.Services
             return result;
         }
 
-        public async Task<ResultExtension<List<Book>>> GetBooksBySearchTypeAsync(string searchTerm, SearchType type = SearchType.All)
+        public async Task<ResultExtension<List<Book>>> GetBooksBySearchTypeAsync(string searchTerm, SearchType type = SearchType.All, int takeCount = 25)
         {
             var resultExt = new ResultExtension<List<Book>>();
-            if (string.IsNullOrEmpty(searchTerm))
+            if (string.IsNullOrEmpty(searchTerm) || type.Equals(SearchType.All))
             {
-                resultExt.Result = _booksRepository.GetAllAsync(searchTerm).Result.ToList();
+                resultExt.Result = _booksRepository.GetSpecifiedCountBooksAsync(takeCount, searchTerm).Result.ToList();
                 return resultExt;
             }
 
@@ -154,11 +154,11 @@ namespace BooksSpot.Service.Services
             return resultExt;
         }
 
-        public async Task<List<Book>> GetBooksByFiltersAsync(BookStatus status, Genre genre)
+        public async Task<List<Book>> GetBooksByFiltersAsync(BookStatus status, Genre genre, int takeCount = 25)
         {
             if (status.Equals(BookStatus.NotSet) && genre.Equals(Genre.NotSet))
             {
-                return await _booksRepository.GetAllAsync();
+                return await _booksRepository.GetSpecifiedCountBooksAsync(takeCount);
             }
             if (status.Equals(BookStatus.NotSet))
             {
@@ -171,31 +171,12 @@ namespace BooksSpot.Service.Services
             return await _booksRepository.GetByGenreAndStatus(genre, status);
         }
 
-        public async Task ReturnExpiredBooks()
-        {
-            var allBooks = await GetAllBooksAsync();
-            var expiredBooks = allBooks.Where(b =>
-                               b.BookRezervationInfo != null &&
-                               b.BookRezervationInfo.RezervationExpirationDate <= DateTime.UtcNow)
-                               .ToList();
-
-            foreach (var book in expiredBooks)
-            {
-                if (book.UserId != null)
-                {
-                    await ReturnBookAsync(book.UserId, book);
-                }
-            }
-        }
-
-
         private Dictionary<SearchType, Func<string, Task<List<Book>>>> GetSearchMethods()
         {
             var dict = new Dictionary<SearchType, Func<string, Task<List<Book>>>>
             {
                 { SearchType.Author, _booksRepository.GetByAuthorAsync },
-                { SearchType.Title, _booksRepository.GetByTitleAsync },
-                { SearchType.All, _booksRepository.GetAllAsync },
+                { SearchType.Title, _booksRepository.GetByTitleAsync },             
                 { SearchType.Isbn, _booksRepository.GetByIsbnAsync },
                 { SearchType.Publisher, _booksRepository.GetByPublisherAsync }
             };

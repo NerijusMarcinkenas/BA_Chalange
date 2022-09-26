@@ -3,6 +3,7 @@ using AutoFixture.Xunit2;
 using BooksSpot.Core.Enums;
 using BooksSpot.Core.Models;
 using BooksSpot.Data.Interfaces;
+using BooksSpot.Data.Repositories;
 using BooksSpot.Service.Interfaces;
 using BooksSpot.Service.Services;
 using Common;
@@ -10,20 +11,20 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using System.Globalization;
 
-namespace DataProject.Tests
+namespace BooksSpotService.Tests
 {
     public class LendingServiceTests
     {
         private readonly Mock<IBooksRepository<Book>> _booksRepositoryMock;
         private readonly Mock<IReaderRepository<ApplicationUser>> _readerRepositoryMock;
-        private readonly Mock<IConfiguration> _configurationMock;     
+        private readonly Mock<IConfiguration> _configurationMock;    
         private readonly IFixture _fixture;
         private readonly ILendingService<Book, ApplicationUser> _sut;
         public LendingServiceTests()
         {
-            _booksRepositoryMock = new Mock<IBooksRepository<Book>>() { CallBase = true};
+            _booksRepositoryMock = new Mock<IBooksRepository<Book>>() { CallBase = true };
             _readerRepositoryMock = new Mock<IReaderRepository<ApplicationUser>>();
-            _configurationMock = new Mock<IConfiguration>();       
+            _configurationMock = new Mock<IConfiguration>();            
             _fixture = new Fixture();
             _sut = new LendingService(
                 _booksRepositoryMock.Object,
@@ -33,24 +34,23 @@ namespace DataProject.Tests
         }
 
         [Fact]
-        public async Task GetAllBooksAsync_ReturnsAllBooks()
+        public async Task GetBooksByTakeCount_ReturnsSpecifedCountOfBooks()
         {
             var booksMock = _fixture.Build<Book>().CreateMany(20).ToList();
-            _booksRepositoryMock.Setup(b => b.GetAllAsync(String.Empty)).ReturnsAsync(booksMock);
-            var resultBooks = await _sut.GetAllBooksAsync();
+            _booksRepositoryMock.Setup(i => i.IsAnyBooks()).Returns(true);
+            _booksRepositoryMock.Setup(b => b.GetSpecifiedCountBooksAsync(int.MaxValue, null)).ReturnsAsync(booksMock);
+            var resultBooks = await _sut.GetBooksByTakeCount(int.MaxValue);
 
             for (int i = 0; i < resultBooks.Count; i++)
             {
                 Assert.Equal(booksMock[i].Id, resultBooks[i].Id);
             }
-
-            _booksRepositoryMock.Verify(a => a.GetAllAsync(string.Empty), Times.Once);
+            _booksRepositoryMock.Verify(a => a.GetSpecifiedCountBooksAsync(int.MaxValue, null), Times.Once);
         }
 
-        [Theory,Book]       
+        [Theory, Book]
         public async Task GetBookByIdAsync_ReturnsBookById(int id, Book bookMock)
-        {
-          //  var bookMock = _fixture.Build<Book>().Create();
+        {          
             _booksRepositoryMock.Setup(g => g.GetBookByIdAsync(id)).ReturnsAsync(bookMock);
             var result = await _sut.GetBookByIdAsync(id);
             Assert.Equal(bookMock, result);
@@ -61,10 +61,10 @@ namespace DataProject.Tests
         [InlineData("")]
         [InlineData(null)]
         public async Task GetUserBooksAsync_WhenUserIdIsNullOrEmpty_ReturnsEmptyList(string userId)
-        {         
+        {
             var result = await _sut.GetUserBooksAsync(userId);
             Assert.Empty(result);
-            _readerRepositoryMock.Verify(g => g.GetUserBooksAsync(userId), Times.Never);            
+            _readerRepositoryMock.Verify(g => g.GetUserBooksAsync(userId), Times.Never);
         }
 
         [Theory]
@@ -82,37 +82,37 @@ namespace DataProject.Tests
             _readerRepositoryMock.Verify(g => g.GetUserBooksAsync(userId), Times.Once);
         }
 
-        [Theory, Book]        
+        [Theory, Book]
         public async Task LendBookAsync_WhenBookIsNotAvailable_ReturnsResultNull(string userId, Book book)
         {
             book.Status = BookStatus.Borrowed;
             var result = await _sut.LendBookAsync(userId, book);
 
             Assert.Null(result.Result);
-            Assert.Equal($"{book.Title} is not available",result.Error);         
-            _readerRepositoryMock.Verify(g => g.GetUserAsync(userId),Times.Never);
+            Assert.Equal($"{book.Title} is not available", result.Error);
+            _readerRepositoryMock.Verify(g => g.GetUserAsync(userId), Times.Never);
         }
 
         [Theory, Book]
         public async Task LendBookAsync_WhenUserIsNullAndBookIsAvailable_ReturnsResultNull(string userId, Book book)
         {
-            ApplicationUser? userMock = null;            
+            ApplicationUser? userMock = null;
             _readerRepositoryMock.Setup(u => u.GetUserAsync(userId)).ReturnsAsync(userMock);
             userMock = _fixture.Build<ApplicationUser>().Create();
 
             var result = await _sut.LendBookAsync(userId, book);
-            
+
             Assert.Null(result.Result);
-            Assert.Equal("User not found", result.Error);            
+            Assert.Equal("User not found", result.Error);
             _booksRepositoryMock.Verify(u => u.Update(book), Times.Never);
-            _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Never);          
+            _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Never);
         }
 
         [Theory, Book]
         public async Task LendBookAsync_WhenBookAndUserIsValid_ReturnsResultBookAndNoError(string userId, Book book)
         {
-            var userMock = _fixture.Build<ApplicationUser>().Create();         
-            _readerRepositoryMock.Setup(u => u.GetUserAsync(userId)).ReturnsAsync(userMock);           
+            var userMock = _fixture.Build<ApplicationUser>().Create();
+            _readerRepositoryMock.Setup(u => u.GetUserAsync(userId)).ReturnsAsync(userMock);
 
             var result = await _sut.LendBookAsync(userId, book);
 
@@ -121,7 +121,7 @@ namespace DataProject.Tests
             Assert.Equal("Book borrowed successfully!", result.Message);
             Assert.Empty(result.Error);
             _booksRepositoryMock.Verify(u => u.Update(book), Times.Once);
-            _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Once);            
+            _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Once);
         }
 
         [Theory, Book]
@@ -133,10 +133,10 @@ namespace DataProject.Tests
             var result = await _sut.MakeRezervationAsync(userId, book);
 
             Assert.NotNull(result.Result);
-            Assert.Equal(book, result.Result);           
+            Assert.Equal(book, result.Result);
             Assert.Empty(result.Error);
             _booksRepositoryMock.Verify(u => u.Update(book), Times.Once);
-            _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Once);            
+            _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Once);
         }
 
         [Theory, Book]
@@ -150,7 +150,7 @@ namespace DataProject.Tests
             var result = await _sut.ReturnBookAsync(userId, book);
 
             Assert.NotNull(result.Result);
-            Assert.Equal(book, result.Result);            
+            Assert.Equal(book, result.Result);
             _booksRepositoryMock.Verify(u => u.Update(book), Times.Once);
             _booksRepositoryMock.Verify(c => c.CommitAsync(), Times.Once);
         }
@@ -160,28 +160,29 @@ namespace DataProject.Tests
         [InlineData(null)]
         public async Task GetBooksBySearchTypeAsync_WhenSearchTermIsNullOrEmpty_ReturnsAllBooksAsync(string searchTerm)
         {
-            var booksMock = _fixture.CreateMany<Book>(10).ToList();          
-            _booksRepositoryMock.Setup(a => a.GetAllAsync(searchTerm)).ReturnsAsync(booksMock);
+            var booksMock = _fixture.CreateMany<Book>(10).ToList();
+            _booksRepositoryMock.Setup(i => i.IsAnyBooks()).Returns(true);
+            _booksRepositoryMock.Setup(a => a.GetSpecifiedCountBooksAsync(int.MaxValue, searchTerm)).ReturnsAsync(booksMock);
 
-            var result = await _sut.GetBooksBySearchTypeAsync(searchTerm);
-           
+            var result = await _sut.GetBooksBySearchTypeAsync(searchTerm, default, int.MaxValue);
+
             Assert.NotNull(result.Result);
-            var notNullResult = result.Result ?? new List<Book>(); 
+            var notNullResult = result.Result ?? new List<Book>();
             for (int i = 0; i < notNullResult.Count; i++)
             {
                 Assert.Equal(booksMock[i].Id, notNullResult[i].Id);
-            }            
-            _booksRepositoryMock.Verify(g => g.GetAllAsync(searchTerm),Times.Once);
+            }
+            _booksRepositoryMock.Verify(g => g.GetSpecifiedCountBooksAsync(int.MaxValue, searchTerm), Times.Once);
         }
 
         [Theory]
-        [InlineData(SearchType.PublishedYear,"2022")]        
-        public async Task GetBooksBySearchTypeAsync_WhenSearchTypeDate_ReturnsBooksByPublishedDate(SearchType searchType,string searchTerm)
+        [InlineData(SearchType.PublishedYear, "2022")]
+        public async Task GetBooksBySearchTypeAsync_WhenSearchTypeDate_ReturnsBooksByPublishedDate(SearchType searchType, string searchTerm)
         {
             var date = DateTime.ParseExact(searchTerm, "yyyy", CultureInfo.InvariantCulture);
-            var booksMock = _fixture.Build<Book>().With(d => d.DatePublished,date).CreateMany(1).ToList();
+            var booksMock = _fixture.Build<Book>().With(d => d.DatePublished, date).CreateMany(1).ToList();
             _booksRepositoryMock.Setup(d => d.GetByPublishedYearAsync(date)).ReturnsAsync(booksMock);
-            var year = date.Year.ToString();           
+            var year = date.Year.ToString();
 
             var result = await _sut.GetBooksBySearchTypeAsync(year, searchType);
 
@@ -192,23 +193,23 @@ namespace DataProject.Tests
                 Assert.Equal(booksMock[i].Id, notNullResult[i].Id);
                 Assert.Equal(booksMock[i].DatePublished, notNullResult[i].DatePublished);
             }
-            _booksRepositoryMock.Verify(d => d.GetByPublishedYearAsync(date),Times.Once); 
+            _booksRepositoryMock.Verify(d => d.GetByPublishedYearAsync(date), Times.Once);
         }
-         
+
         [Theory]
-        [InlineData(BookStatus.NotSet,Genre.NotSet)]
+        [InlineData(BookStatus.NotSet, Genre.NotSet)]
         public async Task GetBooksByFilterAsync_WhenStatusAndGenreNotSet_ReturnsAllBooks(BookStatus status, Genre genre)
         {
-            var booksMock = _fixture.CreateMany<Book>(10).ToList();
-            _booksRepositoryMock.Setup(a => a.GetAllAsync(null)).ReturnsAsync(booksMock);
+            var booksMock = _fixture.CreateMany<Book>(10).ToList();            
+            _booksRepositoryMock.Setup(a => a.GetSpecifiedCountBooksAsync(int.MaxValue, null)).ReturnsAsync(booksMock);
 
-            var result = await _sut.GetBooksByFiltersAsync(status, genre);
+            var result = await _sut.GetBooksByFiltersAsync(status, genre, int.MaxValue);
 
             for (int i = 0; i < result.Count; i++)
             {
                 Assert.Equal(booksMock[i].Id, result[i].Id);
             }
-            _booksRepositoryMock.Verify(g => g.GetAllAsync(null), Times.Once);
+            _booksRepositoryMock.Verify(g => g.GetSpecifiedCountBooksAsync(int.MaxValue, null), Times.Once);
         }
 
         [Theory]
@@ -258,8 +259,8 @@ namespace DataProject.Tests
             }
             _booksRepositoryMock.Verify(g => g.GetByGenreAndStatus(genre, status), Times.Once);
         }
-        
-        
+
+
         private void SetFixtureBehavior()
         {
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()

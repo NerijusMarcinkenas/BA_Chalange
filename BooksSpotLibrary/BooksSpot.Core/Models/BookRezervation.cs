@@ -5,8 +5,8 @@ namespace BooksSpot.Core.Models
     public class BookRezervation
     {
         public int Id { get; set; }      
-        public DateTime? RezerverdDate { get; set; } = null;        
-        public DateTime? RezervationExpirationDate { get; set; } = null;        
+        public DateTime RezerverdDate { get; set; }   
+        public DateTime RezervationExpirationDate { get; set; } 
 
         [ForeignKey("User")]
         public string? UserId { get; set; }
@@ -20,8 +20,8 @@ namespace BooksSpot.Core.Models
         public int ExpirationDays { get; private set; } = 14;
         public BookRezervation()
         {            
-            RezervationExpirationDate = DateTime.UtcNow.AddDays(ExpirationDays);
-            RezerverdDate = DateTime.UtcNow;
+            RezervationExpirationDate = DateTime.UtcNow.AddDays(ExpirationDays).Date;
+            RezerverdDate = DateTime.UtcNow.Date;
         }
     }
 }
