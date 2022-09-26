@@ -1,0 +1,33 @@
+﻿@page
+@model BooksSpot.Web.Pages.Authorization.LoginModel
+@{
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-sm-12 col-md-12 col-lg-4">
+            <h2 class="mb-3">Login</h2>
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="LoginDto.Username">Username</label>
+                    <input type="text" asp-for="LoginDto.Username" class="form-control" />
+                    <span asp-validation-for="LoginDto.Username"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" asp-for="LoginDto.Password">Password</label>
+                    <input type="password" asp-for="LoginDto.Password" class="form-control" />
+                    <span asp-validation-for="LoginDto.Password"></span>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" asp-for="LoginDto.RememberMe" class="form-check-input" />
+                    <label class="form-check-label" asp-for="LoginDto.RememberMe">Remember Me?</label>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

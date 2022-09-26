@@ -1,0 +1,30 @@
+﻿@page "{bookId}/{handler}"
+@model BooksSpot.Web.Pages.Books.ReturnModel
+@{  
+}
+
+
+@if (Model.Handler == "cancel")
+{
+    <h2>Cancel Rezervation</h2>
+    <form method="post">
+        <div>
+            Do you want to cancel rezervation for @Model.BookToReturnDto.Title by @Model.BookToReturnDto.Author book?
+        </div>
+        <button class="btn btn-primary" type="submit">Yes</button>
+        <a class="btn btn-secondary" asp-page="/User/MyBooks">No</a>
+    </form>
+}else if(Model.Handler == "return")
+{
+    <h2>Return Book</h2>
+    <form method="post">
+        <div>
+            Do you want to return @Model.BookToReturnDto.Title by @Model.BookToReturnDto.Author book?
+        </div>
+        <button class="btn btn-primary" type="submit">Yes</button>
+        <a class="btn btn-secondary" asp-page="/User/MyBooks">No</a>
+    </form>
+}
+
+
+

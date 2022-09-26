@@ -1,0 +1,118 @@
+﻿@page "{handler?}/{bookId:int?}"
+@using BooksSpot.Core.Enums
+@model BooksSpot.Web.Pages.Books.BooksListModel
+@{
+}
+
+<div class="container p-3">
+    <div class="text-success"><p>@Model.Message</p></div>
+    <div class="text-danger"><p>@Model.Error</p></div>
+
+    <div class="row text-end mb-2 justify-content-end">
+        <div class=col-5></div>
+        <div class=col-1>Filter by:</div>
+
+        <div class="col-3">
+            <div class="">
+                <form method="get">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <select class="form-control" asp-for="BookStatus" asp-items="Model.BookStatusFilter">
+                            </select>
+                            <select class="form-control" asp-for="Genre" asp-items="Model.GenreFilter">
+                            </select>
+                            <button asp-page-handler="Filter" type="submit" class="btn btn-dark ">
+                                <i class="bi bi-check-square"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row pt-6">
+        <div class="col-8">
+            <h2 class="text-secondary">Search books</h2>
+        </div>
+        <div class="col-4 text-end mb-2 flex-nowrap">
+            <form method="get">
+                <div class="form-group">
+                    <div class="input-group">
+                        <select class="form-control" asp-for="SearchType" asp-items="Model.SearchTypes">
+                        </select>
+                        <input name="searchTerm" type="search" class="form-control w-50"
+                               asp-for="SearchTerm" />
+                        <button asp-page-handler="Search" type="submit" class="btn btn-dark ">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped align-content-center" style="width: 100%">
+        <thead>
+            <tr>
+                <th>Details</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model.BooksDto)
+            {
+                <tr>
+                    <td width="1" class="text-center">
+                        <a class="btn btn-info m-1" asp-page="./Details" asp-route-bookId="@book.BookId"><i class="bi bi-three-dots"></i></a>
+                    </td>
+                    <td>
+                        @book.Title
+                    </td>
+                    <td>
+                        @book.Author
+                    </td>
+                    <td>
+                        @EnumExtensions.GetDisplayName(book.Genre)
+                    </td>
+                    <td>
+                        @book.Status
+                    </td>
+                    @if (book.Status.Equals(BookStatus.Available))
+                    {
+                        <td class="text-center flex-column" width="200">
+                            <form method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success m-1"
+                                asp-page="./Borrow"
+                                asp-page-handler="Borrow"
+                                asp-route-bookId="@book.BookId">
+                                    Borrow
+                                </button>
+                            </form>
+                            <form method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success m-1"
+                                asp-page="./Borrow"
+                                asp-page-handler="Rezerve"
+                                asp-route-bookId="@book.BookId">
+                                    Rezerve
+                                </button>
+                            </form>
+
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            Book is not awailable.
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

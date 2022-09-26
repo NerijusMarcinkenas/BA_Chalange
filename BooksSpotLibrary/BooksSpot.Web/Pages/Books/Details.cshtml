@@ -1,0 +1,27 @@
+﻿@page "{bookId}"
+@model User.DetailsModel
+@{
+}
+
+<a href='javascript:history.go(-1)' class="btn btn-close"></a>
+
+<h2>@Model.BookDto.Title</h2>
+<div>
+    Author: @Model.BookDto.Author
+</div>
+<div>
+    Genre: @Model.BookDto.Genre
+</div>
+<div>
+    Publisher: @Model.BookDto.Publisher
+</div>
+<div>
+    Year published: @Model.BookDto.DatePublished.Year
+</div>
+<div>
+    ISBN: @Model.BookDto.Isbn
+</div>
+<div>
+    Book status: @Model.BookDto.Status
+</div>
+

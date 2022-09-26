@@ -1,0 +1,83 @@
+﻿@page
+@using BooksSpot.Core.Enums
+@model BooksSpot.Web.Pages.User.MyBooksModel
+@{
+
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="text-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="text-danger">@TempData["Error"]</div>
+}
+@if (TempData["NotFound"] != null)
+{
+    <div class="text-danger">@TempData["NotFound"]</div>
+}
+
+<h2>My Books</h2>
+
+@{
+    if (Model.MyBooks.Any())
+    {
+        <table class="table table-bordered table-striped" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Details</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var book in Model.MyBooks)
+                {
+                    <tr>
+                        <td width="1" class="text-center">
+                            <a class="btn btn-info m-1" asp-page="./Details" asp-route-bookId="@book.BookId"><i class="bi bi-three-dots"></i></a>
+                        </td>
+                        <td>
+                            @book.Title
+                        </td>
+                        <td>
+                            @book.Author
+                        </td>
+                        <td>
+                            @EnumExtensions.GetDisplayName(book.Genre)
+                        </td>
+                        <td>
+                            @book.Status
+                        </td>
+                        @if (book.Status.Equals(BookStatus.Borrowed))
+                        {
+                            <td class="text-center flex-column" width="200">
+                                <a type="submit" class="btn btn-danger m-1 w-100" 
+                                asp-page="/Books/Return" 
+                                asp-page-handler="return"  
+                                asp-route-bookId="@book.BookId">Return</a>
+                            </td>
+                        }
+                        else if ((book.Status.Equals(BookStatus.Reserved)))
+                        {
+                            <td class="text-center flex-column" width="200">
+                                <a type="submit" class="btn btn-danger m-1 w-100" 
+                                asp-page="/Books/Return" 
+                                asp-page-handler="cancel" 
+                                asp-route-bookId="@book.BookId">Cancel Rezervation</a>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }else
+    {
+        <div class="text-center ">You have no books yet</div>
+    }
+}

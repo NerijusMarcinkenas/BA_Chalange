@@ -1,0 +1,57 @@
+[
+  {
+    "Isbn": "9780735211292",
+    "Title": "Atomic Habits",
+    "Author": "James Clear",
+    "Publisher": "Avery, an Imprint of Penguin Random House LLC",
+    "Genre": 12,
+    "DatePublished": "2018-01-01T00:00:00",
+    "Status": 1,
+    "UserId": null,
+    "User": null
+  },
+  {
+    "Isbn": "9781594201455",
+    "Title": "In Defense of Food",
+    "Author": "Michael Pollan",
+    "Publisher": "Penguin Press HC, The",
+    "Genre": 14,
+    "DatePublished": "2008-01-01T00:00:00",
+    "Status": 1,
+    "UserId": null,
+    "User": null
+  },
+  {
+    "Isbn": "9780446679954",
+    "Title": "RICH DAD, POOR DAD",
+    "Author": " Robert T. Kiyosaki",
+    "Publisher": "Warner Books",
+    "Genre": 13,
+    "DatePublished": "1990-01-01T00:00:00",
+    "Status": 1,
+    "UserId": null,
+    "User": null
+  },
+  {
+    "Isbn": "9781884365300",
+    "Title": "The jungle",
+    "Author": "Upton Sinclair",
+    "Publisher": "See Sharp Press",
+    "Genre": 3,
+    "DatePublished": "2003-01-01T00:00:00",
+    "Status": 1,
+    "UserId": null,
+    "User": null
+  },
+  {
+    "Isbn": "9780783891255",
+    "Title": "The The millionaire mind",
+    "Author": "Thomas J. Stanley",
+    "Publisher": "G.K. Hall",
+    "Genre": 13,
+    "DatePublished": "2000-01-01T00:00:00",
+    "Status": 1,
+    "UserId": null,
+    "User": null
+  }
+]
